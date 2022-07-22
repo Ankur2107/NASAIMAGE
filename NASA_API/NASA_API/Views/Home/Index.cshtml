@@ -1,0 +1,110 @@
+﻿<style>
+    table, th, td {
+        border: 1px solid;
+        padding:5px;
+    }
+    .jumbotron p {
+        font-size: 14px;
+    }
+
+</style>
+<div class="jumbotron">
+    <div>
+      
+ 
+
+        <div id="dvdisplay" >
+            <div>
+                <label for="search">Search query:</label>
+                <input type="text" id="search" name="search">
+
+                <label for="Startyear">Start Year:</label>
+                <input type="number" id="Startyear" name="Startyear" min="1000" max="2099" step="1" />
+
+                <label for="Endyear">End year:</label>
+                <input type="number" id="Endyear" name="Endyear" min="1000" max="2099" step="1" />
+                <label for="media">Media Type:</label> Image  
+                <button type="submit" value="Submit" onclick="Search()" style="margin-left:50px;">Search</button>
+            </div>
+
+
+            <table id="tbllist" style="margin-top:20px;margin-left:200px;">
+               
+            </table>
+        </div>
+        <div id="dvdetails" style="display:none;">
+            <button style="margin-left:950px;" onclick="show()">Back </button>
+
+            <p style="text-align:center;">
+                <img class="center" id="path" style="height: 235px;width: 500px;" />
+                </p>
+                <label>Center</label>
+<p id="center"></p>
+            <label>Description</label> <p id="desc"></p>
+            <label>Nasa Id</label> <p id="nasa_id"></p>
+            <label>title</label> <p id="title"></p>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        Search() ;
+    });
+    var collection;
+    function Search() {
+        var keyword = $("#search").val();
+        var year_start = $("#Startyear").val();
+        var year_end = $("#Endyear").val();
+        $("#tbllist tr").remove();
+
+        debugger;
+        $.ajax({
+            type: 'GET',
+            url: '/api/values/index',
+            data: { "q": keyword, "year_start": year_start, "year_end": year_end },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function display(data, status) {
+                $("#tbllist").append(' <thead>< tr ><th>Center</th><th>Image</th></tr ></thead > ');
+              collection = jQuery.parseJSON(data);
+
+                jQuery.each(collection.collection.items, function (index, item) {
+                    if (item.links != undefined) {
+
+                        var tbl = $("#tbllist");
+
+                        $("#tbllist").append('<tr><td>' + item.data[0].center + '</td><td><img style="cursor:pointer" src="' + item.links[0].href + '" width=500 height=200 onclick=change('+index+')></td></tr>');
+
+                        // console.log(item.links[0].href);
+                    }
+                });
+
+
+            },
+        });
+
+
+    }
+ 
+    function change(data) {
+
+        $("#dvdisplay").hide();
+        $("#dvdetails").show();
+
+        $('#center').text(collection.collection.items[data].data[0].center);
+        $('#title').text(collection.collection.items[data].data[0].title);
+        $('#desc').text(collection.collection.items[data].data[0].description);
+        $('#nasa_id').text(collection.collection.items[data].data[0].nasa_id);
+    
+        $("#path").attr("src", collection.collection.items[data].links[0].href);
+  
+    }
+    function show()
+    {
+        $("#dvdisplay").show();
+        $("#dvdetails").hide();
+    }
+</script>
